@@ -2,6 +2,7 @@ mod note;
 
 use std::{env, io};
 use std::io::Write;
+use std::process::exit;
 use crate::note::GCLNote;
 
 struct CommandParser;
@@ -10,7 +11,8 @@ impl CommandParser {
     fn parse_commands(&self, g: &GCL, input: Vec<String>) {
         let basecmd: &String = &input[0];
         if basecmd == "note" {
-            GCLNote::new(String::from(&input[1]), String::from(&input[2])).write_to_file();
+            g.create_note(String::from(&input[1]), String::from(&input[2]));
+            //GCLNote::new(String::from(&input[1]), String::from(&input[2])).write_to_file();
         }
         else if basecmd == "console" {
             loop {
@@ -21,6 +23,10 @@ impl CommandParser {
                 let mut input_split = input.split_whitespace().map(|s| s.to_string()).collect();
                 self.parse_commands(g, input_split);
             }
+        }
+        else if basecmd == "exit" {
+            println!("Thank you for using GCL and have a good one!");
+            exit(0);
         }
         else {
             println!("Unknown command!");
