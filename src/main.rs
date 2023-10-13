@@ -1,10 +1,13 @@
 mod note;
+mod audio;
 
 use std::{env, io};
 use std::io::Write;
 use std::net::{TcpListener, TcpStream};
 use std::process::exit;
+use cpal::traits::{DeviceTrait, HostTrait, StreamTrait};
 use crate::note::GCLNote;
+use crate::audio::SineSynth;
 
 struct CommandParser;
 
@@ -17,7 +20,7 @@ impl CommandParser {
         }
         else if basecmd == "console" {
             loop {
-                print!("gcl> ");
+                print!("gcl$ ");
                 io::stdout().flush().expect("Fehler beim Schreiben auf stdout");
                 let mut input= String::new();
                 io::stdin().read_line(&mut input).expect("Error on stdin");
@@ -31,6 +34,9 @@ impl CommandParser {
                 let s = stream.unwrap();
                 g.handle_connection(s);
             }
+        }
+        else if basecmd == "synth" {
+            g.play_synth(440.0);
         }
         else if basecmd == "exit" {
             println!("Thank you for using GCL and have a good one!");
@@ -56,6 +62,12 @@ impl GCL {
         {\"name\": \"Sten\"}
         ";
         stream.write_all(r.as_bytes());
+    }
+    fn play_synth(&self, freq: f32) {
+        let s = SineSynth {
+            freq
+        };
+        s.play();
     }
 }
 
