@@ -1,5 +1,6 @@
 mod note;
 mod audio;
+mod gwl;
 
 use std::{env, io};
 use std::io::Write;
@@ -8,6 +9,8 @@ use std::process::exit;
 use cpal::traits::{DeviceTrait, HostTrait, StreamTrait};
 use crate::note::GCLNote;
 use crate::audio::SineSynth;
+use crate::gwl::GWL;
+
 
 struct CommandParser;
 
@@ -29,11 +32,12 @@ impl CommandParser {
             }
         }
         else if basecmd == "serve" {
-            let listener = TcpListener::bind("127.0.0.1:1234").unwrap();
-            for stream in listener.incoming() {
-                let s = stream.unwrap();
-                g.handle_connection(s);
+            fn asd(mut t: TcpStream) {
+                t.write("asd".as_bytes());
             }
+            let mut gw = GWL::new("127.0.0.1".to_string());
+            gw.route("/".to_string(), asd);
+            gw.serve();
         }
         else if basecmd == "synth" {
             g.play_synth(440.0);
