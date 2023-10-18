@@ -3,7 +3,7 @@ mod audio;
 mod gwl;
 
 use std::{env, io};
-use std::io::Write;
+use std::io::{BufRead, BufReader, Read, Write};
 use std::net::{TcpListener, TcpStream};
 use std::process::exit;
 use cpal::traits::{DeviceTrait, HostTrait, StreamTrait};
@@ -32,11 +32,19 @@ impl CommandParser {
             }
         }
         else if basecmd == "serve" {
-            fn asd(mut t: TcpStream) {
-                t.write("asd".as_bytes());
-            }
             let mut gw = GWL::new("127.0.0.1".to_string());
-            gw.route("/".to_string(), asd);
+            gw.route("/".to_string(), |mut t: TcpStream| {
+                let buf_reader = BufReader::new(&mut t);
+                let http_request: Vec<_> = buf_reader
+                    .lines()
+                    .map(|result| result.unwrap())
+                    .take_while(|line| !line.is_empty())
+                    .collect();
+
+                let response = "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\n\r\n{\"name\": \"sten\", \"age\": 25}";
+
+                t.write_all(response.as_bytes()).unwrap();
+            });
             gw.serve();
         }
         else if basecmd == "synth" {
